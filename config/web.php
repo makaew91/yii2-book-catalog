@@ -7,14 +7,59 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'container' => [
+        'singletons' => [
+            // Repositories
+            \app\repositories\interfaces\AuthorRepositoryInterface::class => \app\repositories\AuthorRepository::class,
+            \app\repositories\interfaces\BookRepositoryInterface::class => \app\repositories\BookRepository::class,
+            \app\repositories\interfaces\SubscriptionRepositoryInterface::class => \app\repositories\SubscriptionRepository::class,
+            
+            // Services
+            \app\services\interfaces\SmsServiceInterface::class => \app\services\SmsService::class,
+            \app\services\interfaces\FileUploadServiceInterface::class => \app\services\FileUploadService::class,
+            \app\services\interfaces\NotificationServiceInterface::class => [
+                'class' => \app\services\NotificationService::class,
+                '__construct()' => [
+                    'subscriptionRepository' => \yii\di\Instance::of(\app\repositories\interfaces\SubscriptionRepositoryInterface::class),
+                    'smsService' => \yii\di\Instance::of(\app\services\interfaces\SmsServiceInterface::class),
+                ],
+            ],
+            \app\services\BookService::class => [
+                'class' => \app\services\BookService::class,
+                '__construct()' => [
+                    'bookRepository' => \yii\di\Instance::of(\app\repositories\interfaces\BookRepositoryInterface::class),
+                    'fileUploadService' => \yii\di\Instance::of(\app\services\interfaces\FileUploadServiceInterface::class),
+                    'notificationService' => \yii\di\Instance::of(\app\services\interfaces\NotificationServiceInterface::class),
+                ],
+            ],
+            \app\services\AuthorService::class => [
+                'class' => \app\services\AuthorService::class,
+                '__construct()' => [
+                    'authorRepository' => \yii\di\Instance::of(\app\repositories\interfaces\AuthorRepositoryInterface::class),
+                ],
+            ],
+            \app\services\SubscriptionService::class => [
+                'class' => \app\services\SubscriptionService::class,
+                '__construct()' => [
+                    'subscriptionRepository' => \yii\di\Instance::of(\app\repositories\interfaces\SubscriptionRepositoryInterface::class),
+                ],
+            ],
+        ],
+    ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'eoAY71fAjzvnAJ4nM2mvg8gZLDlbJWBt',
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ],
+        ],
+        'response' => [
+            'format' => yii\web\Response::FORMAT_JSON,
+            'charset' => 'UTF-8',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -42,14 +87,17 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
+            'enableStrictParsing' => false,
             'showScriptName' => false,
             'rules' => [
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/book'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/author'],
+                'POST api/subscription' => 'api/subscription/create',
+                'GET api/report/top-authors' => 'api/report/top-authors',
             ],
         ],
-        */
     ],
     'params' => $params,
 ];
