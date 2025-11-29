@@ -25,8 +25,7 @@ use yii\web\UploadedFile;
  */
 class Book extends ActiveRecord
 {
-    public UploadedFile|null $coverFile;
-    /** @var Author[]  */
+    public UploadedFile|null $coverFile = null;
     public array $authorIds = [];
 
     public static function tableName(): string
