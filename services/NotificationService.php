@@ -2,30 +2,31 @@
 
 namespace app\services;
 
+use app\jobs\SendSmsJob;
 use app\models\Book;
 use app\repositories\interfaces\SubscriptionRepositoryInterface;
 use app\services\interfaces\NotificationServiceInterface;
-use app\services\interfaces\SmsServiceInterface;
 use Yii;
+use yii\queue\Queue;
 
 /**
  * Сервис уведомлений
+ * Отправляет задачи в очередь RabbitMQ для асинхронной обработки
  */
 class NotificationService implements NotificationServiceInterface
 {
     private SubscriptionRepositoryInterface $subscriptionRepository;
-    private SmsServiceInterface $smsService;
+    private Queue $queue;
 
     public function __construct(
-        SubscriptionRepositoryInterface $subscriptionRepository,
-        SmsServiceInterface $smsService
+        SubscriptionRepositoryInterface $subscriptionRepository
     ) {
         $this->subscriptionRepository = $subscriptionRepository;
-        $this->smsService = $smsService;
+        $this->queue = Yii::$app->queue;
     }
 
     /**
-     * Уведомить подписчиков о новой книге
+     * Уведомить подписчиков о новой книге (асинхронно через очередь)
      */
     public function notifyNewBook(Book $book): void
     {
@@ -34,14 +35,22 @@ class NotificationService implements NotificationServiceInterface
         }
 
         $subscriptions = $this->subscriptionRepository->findByAuthorIds($book->authorIds);
+        $jobsCount = 0;
 
         foreach ($subscriptions as $subscription) {
             $message = $this->buildNewBookMessage($book, $subscription->author->full_name);
-            $this->smsService->send($subscription->phone, $message);
+            
+            // Отправляем задачу в очередь
+            $this->queue->push(new SendSmsJob([
+                'phone' => $subscription->phone,
+                'message' => $message,
+            ]));
+            
+            $jobsCount++;
         }
 
         Yii::info(
-            sprintf('Sent %d notifications for book "%s"', count($subscriptions), $book->title),
+            sprintf('Queued %d SMS notifications for book "%s"', $jobsCount, $book->title),
             __METHOD__
         );
     }

@@ -21,7 +21,6 @@ $config = [
                 'class' => \app\services\NotificationService::class,
                 '__construct()' => [
                     'subscriptionRepository' => \yii\di\Instance::of(\app\repositories\interfaces\SubscriptionRepositoryInterface::class),
-                    'smsService' => \yii\di\Instance::of(\app\services\interfaces\SmsServiceInterface::class),
                 ],
             ],
             \app\services\BookService::class => [
@@ -87,6 +86,13 @@ $config = [
             ],
         ],
         'db' => $db,
+        'queue' => [
+            'class' => \yii\queue\db\Queue::class,
+            'db' => 'db',
+            'tableName' => '{{%queue}}',
+            'channel' => 'default',
+            'mutex' => \yii\mutex\MysqlMutex::class,
+        ],
         'urlManager' => [
             'enablePrettyUrl' => true,
             'enableStrictParsing' => false,
