@@ -7,6 +7,7 @@ REST API приложение для управления каталогом к�
 - **PHP 8.2+**
 - **Yii2 Framework**
 - **MySQL 8.0**
+- **RabbitMQ**
 - **Docker & Docker Compose**
 
 ## Архитектура
@@ -259,25 +260,6 @@ docker-compose exec php composer require <package-name>
 
 Доступна в dev-режиме по адресу: **http://localhost:8000/debug**
 
-## Тестирование
-
-```bash
-# Запустить все тесты
-docker-compose exec php vendor/bin/codecept run
-
-# Только unit-тесты
-docker-compose exec php vendor/bin/codecept run unit
-
-# Только функциональные тесты
-docker-compose exec php vendor/bin/codecept run functional
-```
-
-## Требования
-
-- Docker Engine 17.04+
-- Docker Compose 1.18+
-- Минимум 2GB RAM для контейнеров
-
 ## Troubleshooting
 
 ### Порт 8000 уже занят
@@ -312,11 +294,3 @@ docker-compose up -d
 # Применить миграции
 docker-compose exec php php yii migrate/up --interactive=0
 ```
-
-## Лицензия
-
-BSD-3-Clause
-
-## Контакты
-
-При возникновении вопросов создавайте Issue в репозитории.
