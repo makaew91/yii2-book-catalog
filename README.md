@@ -1,233 +1,322 @@
-<p align="center">
-    <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
-    </a>
-    <h1 align="center">Yii 2 Basic Project Template</h1>
-    <br>
-</p>
+# Каталог книг на Yii2 + MySQL (REST API)
 
-Yii 2 Basic Project Template is a skeleton [Yii 2](https://www.yiiframework.com/) application best for
-rapidly creating small projects.
+REST API приложение для управления каталогом книг с авторами, подписками и отчётами.
 
-The template contains the basic features including user login/logout and a contact page.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
+## Технологии
 
-[![Latest Stable Version](https://img.shields.io/packagist/v/yiisoft/yii2-app-basic.svg)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Total Downloads](https://img.shields.io/packagist/dt/yiisoft/yii2-app-basic.svg)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![build](https://github.com/yiisoft/yii2-app-basic/workflows/build/badge.svg)](https://github.com/yiisoft/yii2-app-basic/actions?query=workflow%3Abuild)
+- **PHP 8.2+**
+- **Yii2 Framework**
+- **MySQL 8.0**
+- **Docker & Docker Compose**
 
-DIRECTORY STRUCTURE
--------------------
+## Архитектура
 
-      assets/             contains assets definition
-      commands/           contains console commands (controllers)
-      config/             contains application configurations
-      controllers/        contains Web controller classes
-      mail/               contains view files for e-mails
-      models/             contains model classes
-      runtime/            contains files generated during runtime
-      tests/              contains various tests for the basic application
-      vendor/             contains dependent 3rd-party packages
-      views/              contains view files for the Web application
-      web/                contains the entry script and Web resources
+Проект построен по принципам **SOLID** с использованием:
 
+- **Репозитории** (Repository Pattern) — доступ к данным
+- **Сервисы** (Service Layer) — бизнес-логика
+- **Dependency Injection** — внедрение зависимостей через интерфейсы
+- **REST API** — контроллеры только для обработки HTTP-запросов
 
-
-REQUIREMENTS
-------------
-
-The minimum requirement by this project template that your Web server supports PHP 7.4.
-
-
-INSTALLATION
-------------
-
-### Install via Composer
-
-If you do not have [Composer](https://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](https://getcomposer.org/doc/00-intro.md#installation-nix).
-
-You can then install this project template using the following command:
-
-~~~
-composer create-project --prefer-dist yiisoft/yii2-app-basic basic
-~~~
-
-Now you should be able to access the application through the following URL, assuming `basic` is the directory
-directly under the Web root.
-
-~~~
-http://localhost/basic/web/
-~~~
-
-### Install from an Archive File
-
-Extract the archive file downloaded from [yiiframework.com](https://www.yiiframework.com/download/) to
-a directory named `basic` that is directly under the Web root.
-
-Set cookie validation key in `config/web.php` file to some random secret string:
-
-```php
-'request' => [
-    // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-    'cookieValidationKey' => '<secret random string goes here>',
-],
+```
+├── controllers/api/      # REST API контроллеры
+├── models/               # ActiveRecord модели
+├── repositories/         # Репозитории для доступа к данным
+│   └── interfaces/       # Интерфейсы репозиториев
+├── services/             # Бизнес-логика
+│   └── interfaces/       # Интерфейсы сервисов
+├── migrations/           # Миграции БД
+└── config/               # Конфигурация (включая DI Container)
 ```
 
-You can then access the application through the following URL:
+## Быстрый старт
 
-~~~
-http://localhost/basic/web/
-~~~
+### 1. Клонирование и запуск
 
+```bash
+# Клонировать репозиторий
+git clone <repository-url>
+cd yii2-book-catalog
 
-### Install with Docker
-
-Update your vendor packages
-
-    docker-compose run --rm php composer update --prefer-dist
-    
-Run the installation triggers (creating cookie validation code)
-
-    docker-compose run --rm php composer install    
-    
-Start the container
-
+# Поднять контейнеры (PHP 8.2 + MySQL 8.0)
     docker-compose up -d
     
-You can then access the application through the following URL:
-
-    http://127.0.0.1:8000
-
-**NOTES:** 
-- Minimum required Docker engine version `17.04` for development (see [Performance tuning for volume mounts](https://docs.docker.com/docker-for-mac/osxfs-caching/))
-- The default configuration uses a host-volume in your home directory `.docker-composer` for composer caches
-
-
-CONFIGURATION
--------------
-
-### Database
-
-Edit the file `config/db.php` with real data, for example:
-
-```php
-return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '1234',
-    'charset' => 'utf8',
-];
+# Проверить статус контейнеров
+docker-compose ps
 ```
 
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
+### 2. Применить миграции
 
-
-TESTING
--------
-
-Tests are located in `tests` directory. They are developed with [Codeception PHP Testing Framework](https://codeception.com/).
-By default, there are 3 test suites:
-
-- `unit`
-- `functional`
-- `acceptance`
-
-Tests can be executed by running
-
-```
-vendor/bin/codecept run
+```bash
+# Накатить миграции (создать таблицы и добавить тестовые данные)
+docker-compose exec php php yii migrate/up --interactive=0
 ```
 
-The command above will execute unit and functional tests. Unit tests are testing the system components, while functional
-tests are for testing user interaction. Acceptance tests are disabled by default as they require additional setup since
-they perform testing in real browser. 
+### 3. API готов к использованию!
 
+API доступен по адресу: **http://localhost:8000**
 
-### Running  acceptance tests
+Тестовые данные включают:
+- 5 авторов (Толстой, Достоевский, Пушкин, Чехов, Гоголь)
+- 8 книг с разными годами выпуска
 
-To execute acceptance tests do the following:  
+## 📚 Документация API
 
-1. Rename `tests/acceptance.suite.yml.example` to `tests/acceptance.suite.yml` to enable suite configuration
+Полная документация API с примерами запросов находится в файле:
 
-2. Replace `codeception/base` package in `composer.json` with `codeception/codeception` to install full-featured
-   version of Codeception
+**[API_DOCS.md](API_DOCS.md)**
 
-3. Update dependencies with Composer 
+### Основные эндпоинты
 
-    ```
-    composer update  
-    ```
+```bash
+# Список книг
+GET http://localhost:8000/api/books
 
-4. Download [Selenium Server](https://www.seleniumhq.org/download/) and launch it:
+# Книга по ID
+GET http://localhost:8000/api/books/1
 
-    ```
-    java -jar ~/selenium-server-standalone-x.xx.x.jar
-    ```
+# Список авторов
+GET http://localhost:8000/api/authors
 
-    In case of using Selenium Server 3.0 with Firefox browser since v48 or Google Chrome since v53 you must download [GeckoDriver](https://github.com/mozilla/geckodriver/releases) or [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) and launch Selenium with it:
+# Автор по ID
+GET http://localhost:8000/api/authors/1
 
-    ```
-    # for Firefox
-    java -jar -Dwebdriver.gecko.driver=~/geckodriver ~/selenium-server-standalone-3.xx.x.jar
-    
-    # for Google Chrome
-    java -jar -Dwebdriver.chrome.driver=~/chromedriver ~/selenium-server-standalone-3.xx.x.jar
-    ``` 
-    
-    As an alternative way you can use already configured Docker container with older versions of Selenium and Firefox:
-    
-    ```
-    docker run --net=host selenium/standalone-firefox:2.53.0
-    ```
+# Подписка на автора (доступно всем)
+POST http://localhost:8000/api/subscription
+Content-Type: application/json
+{
+  "author_id": 1,
+  "phone": "+79991234567"
+}
 
-5. (Optional) Create `yii2basic_test` database and update it by applying migrations if you have them.
-
-   ```
-   tests/bin/yii migrate
-   ```
-
-   The database configuration can be found at `config/test_db.php`.
-
-
-6. Start web server:
-
-    ```
-    tests/bin/yii serve
-    ```
-
-7. Now you can run all available tests
-
-   ```
-   # run all available tests
-   vendor/bin/codecept run
-
-   # run acceptance tests
-   vendor/bin/codecept run acceptance
-
-   # run only unit and functional tests
-   vendor/bin/codecept run unit,functional
-   ```
-
-### Code coverage support
-
-By default, code coverage is disabled in `codeception.yml` configuration file, you should uncomment needed rows to be able
-to collect code coverage. You can run your tests and collect coverage with the following command:
-
-```
-#collect coverage for all tests
-vendor/bin/codecept run --coverage --coverage-html --coverage-xml
-
-#collect coverage only for unit tests
-vendor/bin/codecept run unit --coverage --coverage-html --coverage-xml
-
-#collect coverage for unit and functional tests
-vendor/bin/codecept run functional,unit --coverage --coverage-html --coverage-xml
+# ТОП-10 авторов за год (доступно всем)
+GET http://localhost:8000/api/report/top-authors?year=1869
 ```
 
-You can see code coverage output under the `tests/_output` directory.
+## Функциональность
+
+### Сущности
+
+- **Книга**: название, год выпуска, описание, ISBN, фото обложки
+- **Автор**: ФИО
+- **Связь книга↔️авторы**: у книги может быть несколько авторов
+- **Подписка**: номер телефона подписчика на автора
+
+### Права доступа
+
+#### Гость (не аутентифицирован)
+✅ Просмотр книг  
+✅ Просмотр авторов  
+✅ Подписка на автора  
+✅ Просмотр отчёта TOP-10  
+❌ CRUD книг и авторов
+
+#### Пользователь (аутентифицирован)
+✅ Всё, что доступно гостю  
+✅ Создание/редактирование/удаление книг  
+✅ Создание/редактирование/удаление авторов
+
+### Уведомления
+
+При создании новой книги автоматически отправляются **SMS-уведомления** всем подписчикам авторов этой книги через **smspilot.ru** (тестовый ключ `emulator`, реальной отправки нет).
+
+## Примеры использования
+
+### Получить все книги
+
+```bash
+curl http://localhost:8000/api/books | jq
+```
+
+### Подписаться на автора
+
+```bash
+curl -X POST http://localhost:8000/api/subscription \
+  -H "Content-Type: application/json" \
+  -d '{"author_id":1,"phone":"+79991234567"}'
+```
+
+### Получить ТОП-10 авторов за 1869 год
+
+```bash
+curl "http://localhost:8000/api/report/top-authors?year=1869" | jq
+```
+
+### Создать книгу (требуется аутентификация)
+
+```bash
+curl -X POST http://localhost:8000/api/books \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Новая книга",
+    "year": 2024,
+    "description": "Описание",
+    "isbn": "978-5-17-098648-3",
+    "authorIds": [1, 2]
+  }'
+```
+
+**Ответ без аутентификации:**
+```json
+{
+  "name": "Forbidden",
+  "message": "Требуется аутентификация",
+  "status": 403
+}
+```
+
+## Управление проектом
+
+### Остановить контейнеры
+
+```bash
+docker-compose down
+```
+
+### Перезапустить контейнеры
+
+```bash
+docker-compose restart
+```
+
+### Посмотреть логи
+
+```bash
+# Все логи
+docker-compose logs
+
+# Только PHP
+docker-compose logs php
+
+# В реальном времени
+docker-compose logs -f
+```
+
+### Выполнить команду внутри контейнера
+
+```bash
+# Открыть bash
+docker-compose exec php bash
+
+# Выполнить команду Yii
+docker-compose exec php php yii <command>
+
+# Откатить миграции
+docker-compose exec php php yii migrate/down
+```
+
+### Подключиться к MySQL
+
+```bash
+# Из хоста (порт 3307)
+mysql -h 127.0.0.1 -P 3307 -u yii2 -pyii2 yii2book
+
+# Из контейнера PHP
+docker-compose exec php mysql -h db -u yii2 -pyii2 yii2book
+```
+
+## Структура БД
+
+### Таблицы
+
+- `author` — авторы
+- `book` — книги
+- `book_author` — связь книг и авторов (многие-ко-многим)
+- `author_subscription` — подписки на авторов
+
+### Миграции
+
+```bash
+# Создать новую миграцию
+docker-compose exec php php yii migrate/create <migration_name>
+
+# Применить миграции
+docker-compose exec php php yii migrate/up
+
+# Откатить последнюю миграцию
+docker-compose exec php php yii migrate/down
+```
+
+## Разработка
+
+### Установка зависимостей
+
+```bash
+docker-compose exec php composer install
+```
+
+### Добавление новой зависимости
+
+```bash
+docker-compose exec php composer require <package-name>
+```
+
+### Gii (генератор кода)
+
+Доступен в dev-режиме по адресу: **http://localhost:8000/gii**
+
+### Debug панель
+
+Доступна в dev-режиме по адресу: **http://localhost:8000/debug**
+
+## Тестирование
+
+```bash
+# Запустить все тесты
+docker-compose exec php vendor/bin/codecept run
+
+# Только unit-тесты
+docker-compose exec php vendor/bin/codecept run unit
+
+# Только функциональные тесты
+docker-compose exec php vendor/bin/codecept run functional
+```
+
+## Требования
+
+- Docker Engine 17.04+
+- Docker Compose 1.18+
+- Минимум 2GB RAM для контейнеров
+
+## Troubleshooting
+
+### Порт 8000 уже занят
+
+Измените порт в `docker-compose.yml`:
+
+```yaml
+services:
+  php:
+    ports:
+      - '8080:80'  # вместо 8000:80
+```
+
+### Ошибка подключения к БД
+
+Проверьте, что контейнер MySQL запущен:
+
+```bash
+docker-compose ps
+docker-compose logs db
+```
+
+### Очистить все данные
+
+```bash
+# Остановить и удалить контейнеры + volumes
+docker-compose down -v
+
+# Поднять заново
+docker-compose up -d
+
+# Применить миграции
+docker-compose exec php php yii migrate/up --interactive=0
+```
+
+## Лицензия
+
+BSD-3-Clause
+
+## Контакты
+
+При возникновении вопросов создавайте Issue в репозитории.
